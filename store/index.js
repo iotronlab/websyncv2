@@ -65,6 +65,9 @@ export const actions = {
       color: 'info'
     })
   },
+  async initiateConnection({ commit }) {
+    await commit('SET_CONNECTION', navigator.connection)
+  },
   setSnackbar({ commit, snackbar }) {
     snackbar.showing = true
     commit('SET_SNACKBAR', snackbar)

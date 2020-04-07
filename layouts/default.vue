@@ -93,13 +93,13 @@ export default {
     })
   },
   methods: {
-    ...mapActions(['initiateServer']),
+    ...mapActions(['initiateServer', 'initiateConnection']),
     async initialize() {
       await this.initiateServer()
 
-      await this.initiateConnection((this.connection = navigator.connection))
+      await this.initiateConnection()
 
-      //console.log(connection)
+      this.connection = navigator.connection
 
       // commit('SET_CONNECTION', connection)
     },
