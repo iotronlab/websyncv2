@@ -5,9 +5,12 @@ export const state = () => ({
   server: Object,
   connection: Object,
   devices: [],
+  sharedDevices: [],
+  rooms: [],
   updatedDevice: Object,
   updatedDeviceList: [],
-  snackbars: []
+  snackbars: [],
+  theme: Boolean
 })
 
 export const getters = {
@@ -17,11 +20,20 @@ export const getters = {
   server(state) {
     return state.server
   },
+  theme(state) {
+    return state.theme
+  },
   connection(state) {
     return state.connection
   },
   devices(state) {
     return state.devices
+  },
+  sharedDevices(state) {
+    return state.sharedDevices
+  },
+  rooms(state) {
+    return state.rooms
   },
   updatedDevice(state) {
     return state.updatedDevice
@@ -45,8 +57,18 @@ export const mutations = {
   SET_CONNECTION(state, connection) {
     state.connection = connection
   },
+  SET_THEME(state, theme) {
+    state.theme = theme
+
+  },
   SET_DEVICES(state, devices) {
     state.devices = devices
+  },
+  SET_SHAREDDEVICES(state, sharedDevices) {
+    state.sharedDevices = sharedDevices
+  },
+  SET_ROOMS(state, rooms) {
+    state.rooms = rooms
   },
   SET_UPDATEDDEVICE(state, updatedDevice) {
     state.updatedDevice = updatedDevice
@@ -55,7 +77,9 @@ export const mutations = {
 }
 
 export const actions = {
-  async initiateServer({ commit }) {
+  async initiateServer({
+    commit
+  }) {
     let response = await this.$axios.$get('/')
 
     commit('SET_SERVER', response.data)
@@ -65,33 +89,62 @@ export const actions = {
       color: 'info'
     })
   },
-  async initiateConnection({ commit }) {
+  async updateTheme({
+    commit
+  }, {
+
+    status
+  }) {
+
+
+    await commit('SET_THEME',
+      status
+    )
+
+  },
+  async initiateConnection({
+    commit
+  }) {
     await commit('SET_CONNECTION', navigator.connection)
   },
-  setSnackbar({ commit, snackbar }) {
+  setSnackbar({
+    commit,
+    snackbar
+  }) {
     snackbar.showing = true
     commit('SET_SNACKBAR', snackbar)
     console.log(snackbar)
   },
-  async initiateDevice({ commit }) {
+  async initiateDevice({
+    commit
+  }) {
     let response = await this.$axios.$get('/devices')
-
-    commit('SET_DEVICES', response.data)
+    console.log(response)
+    commit('SET_DEVICES', response.devices)
+    commit('SET_SHAREDDEVICES', response.shared)
+    commit('SET_ROOMS', response.rooms)
   },
-  async update({ dispatch }, { id, status }) {
+  async updateDevice({
+    dispatch
+  }, {
+    id,
+    status
+  }) {
     let response = await this.$axios.$patch(`/devices/update`, {
       id,
       status
     })
     console.log(response)
     dispatch('initiateDevice')
+  },
+  async updatedDevice({
+    commit,
+    dispatch
+  }) {
+
+    commit('SET_UPDATEDDEVICE')
+    dispatch('initiateDevice')
+
+
   }
-  //async updateDevice({ commit, dispatch }) {
-  //	await this.$echo.channel("home").listen("StatusUpdate", e => {
-  //		console.log(e.device)
-  //		commit('SET_UPDATEDDEVICE', e.device)
-  //		dispatch('initiateDevice')
-  //
-  //	});
-  // }
 }
