@@ -1,14 +1,11 @@
 <template>
   <v-sheet class>
-    <v-card-subtitle class="py-1">Owned ({{ devices.length }}) | Shared ({{ shared.length }})</v-card-subtitle>
-
     <v-tabs grow>
       <v-tab v-for="room in rooms" :key="room.id" class="ma-1 nutab">{{ room.name }}</v-tab>
 
       <v-tab-item v-for="room in rooms" :key="room.id">
         <v-container fluid class="px-0">
           <v-row no-gutters>
-            {{response}}
             <v-col
               v-for="device in devices"
               :key="device.id"
@@ -37,7 +34,7 @@
                       hide-details
                       :device="device"
                       v-model="device.status"
-                      @change="update({id: device.id, status: device.status})"
+                      @change="updateDevice({id: device.id, status: device.status})"
                     ></v-switch>
                   </v-col>
                 </v-row>
@@ -68,22 +65,39 @@ import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default {
   data: () => ({
-    response: ''
+    show: false
   }),
+  created() {},
   mounted() {
     this.socket = this.$nuxtSocket({
       name: 'home'
-      // persist: 'mySocket'
+      //  persist: 'mySocket'
     })
     this.initialize()
+
+    this.$OneSignal.push(
+      async () => await this.$OneSignal.showSlidedownPrompt(),
+      console.log(this.$OneSignal),
+      this.$OneSignal.isPushNotificationsEnabled(isEnabled => {
+        if (isEnabled) {
+          console.log('Push notifications are enabled!')
+        } else {
+          console.log('Push notifications are not enabled yet.')
+        }
+      })
+    )
+    //this.displayNotification()
     //    this.initiateSocket()
+    // this.socket.on('updatedDevice',  function(msg){
+    // console.log('yuhu')
+    //  })
   },
   computed: {
     ...mapGetters({
       rooms: 'rooms',
       devices: 'devices',
       shared: 'sharedDevices',
-      theme: 'theme'
+      list: 'updatedDeviceList'
     })
   },
   watch: {},
@@ -92,29 +106,17 @@ export default {
     async initialize() {
       await this.initiateDevice()
       await this.socket.send('User Connected')
-      await this.socket.on('update', resp => {
-        console.log('updated vuex')
-        console.log(resp)
-        // commit('SET_UPDATEDDEVICE', e.device)
-        //  dispatch('initiateDevice')
-      })
+      // await Notification.requestPermission(function(status) {
+      //    console.log(status)
+      //  })
+      //   console.log($OneSignal)
 
-      // commit('SET_CONNECTION', connection)
-    },
-    async update(data) {
-      await this.socket.emit('update', { data }, resp => {
-        this.response = resp
-        //console.log('updated vuex')
-        //console.log(resp.data)
-        // commit('SET_UPDATEDDEVICE', e.device)
-        //  dispatch('initiateDevice')
-      })
-      console.log(data)
+      // Using window and array form
     }
   }
 }
 </script>
-<style scoped>
+<style >
 .nucard {
   border-radius: 20px !important;
 }

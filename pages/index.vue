@@ -1,59 +1,69 @@
 <template>
-  <v-container fluid class="pa-0">
-    <transition name="bounce">
+  <transition name="fade">
+    <v-container fluid class="pa-0">
       <v-row no-gutters>
         <v-col>
           <v-sheet class="text-center">
-            <v-btn @click="doStuff()" />
-            <v-card-title
-              class="alt-title pb-0 pt-2"
-            >Welcome Home, {{ $auth.loggedIn ==0 ? 'Guest':user.name}}</v-card-title>
+            <v-row no-gutters>
+              <UserWeather />
+            </v-row>
+            <v-col>
+              <v-sheet>
+                <v-toolbar flat>
+                  <h2 class="title">Yeelights</h2>
+                  <v-spacer />
+                  <v-btn fab small @click="getYeelights">
+                    <v-icon>mdi-refresh</v-icon>
+                  </v-btn>
+                </v-toolbar>
+                <v-row no-gutters>
+                  <v-col v-for="light in yeelights" :key="light.ip">
+                    <YeeLight :light="light" />
+                  </v-col>
+                </v-row>
+              </v-sheet>
+            </v-col>
 
-            <v-card-text v-if="$auth.loggedIn ==0">Login to view your devices</v-card-text>
             <v-col v-if="$auth.loggedIn">
               <RoomTabs />
             </v-col>
           </v-sheet>
         </v-col>
       </v-row>
-    </transition>
-  </v-container>
+    </v-container>
+  </transition>
 </template>
 
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex'
 import RoomTabs from '@/components/RoomTabs.vue'
+import UserWeather from '@/components/UserWeather'
+import YeeLight from '@/components/YeeLight'
+
 //import SocketStatus from '@/node_modules/nuxt-socket-io/components/SocketStatus'
 export default {
-  data: () => ({
-    //socketStatus: {},
-    //badStatus: {}
-  }),
+  data() {
+    return {}
+  },
   components: {
-    RoomTabs
-    //SocketStatus
+    RoomTabs,
+    UserWeather,
+    YeeLight
   },
-  middleware: 'auth-user',
+  //middleware: 'auth-user',
   mounted() {
-    
-  },
-  methods: {
-    ...mapActions(['updatedDevice']),
-    async initiateSocket() {
-      
-
-     
-    }
+    // Inside page components
+    // this.initialize()
   },
   computed: {
-    ...mapState({
-      user: state => state.auth.user
+    ...mapGetters({
+      yeelights: 'yeelight/yeelightList'
+    })
+  },
+  methods: {
+    ...mapActions({
+      getYeelights: 'yeelight/getYeelights'
     })
   }
 }
 </script>
-<style lang="scss" >
-.alt-title {
-  font-family: 'Poppins', sans-serif;
-}
-</style>

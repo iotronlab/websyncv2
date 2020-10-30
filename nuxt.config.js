@@ -40,7 +40,7 @@ export default {
   /*
    ** Plugins to load before mounting the App
    */
-  plugins: [],
+
   /*
    ** Nuxt.js dev-modules
    */
@@ -54,20 +54,42 @@ export default {
    */
   modules: [
     // Doc: https://axios.nuxtjs.org/usage
+    '@nuxtjs/onesignal',
     '@nuxtjs/axios',
+
     '@nuxtjs/pwa',
     '@nuxtjs/auth',
     // Doc: https://github.com/nuxt-community/dotenv-module
     '@nuxtjs/dotenv',
-    'nuxt-socket-io'
+    'nuxt-socket-io',
+
   ],
+  oneSignal: {
+    cdn: true,
+    init: {
+
+      appId: 'e63876a9-3f7c-4163-81e0-acb1f5521808',
+      allowLocalhostAsSecureOrigin: true,
+      welcomeNotification: {
+        disable: false
+      },
+      autoRegister: true
+    }
+  },
 
   //socket config
   io: {
     sockets: [{
       name: 'home',
-      url: 'http://localhost:5000',
-      default: true
+      url: 'http://127.0.0.1:5000',
+      default: true,
+      vuex: { // optional
+        // pass in the evt --> mutation map OR array of actions
+        actions: [{
+          socketUpdate: 'socketUpdate'
+        }], // pass in the evt --> action map OR array of actions or mixed!,
+        // pass in the state props you want to listen for changes on. When those props thance, they'll fire these "emitBack" events. If the emitBack is a string, it will send the string, otherwise, if it's an object, it will send the mapped string. (see the updated examples in the page/examples.vue, where I also use a "mapState2Way" function in the component).
+      },
     }]
   },
   /*
@@ -123,8 +145,12 @@ export default {
   },
 
   axios: {
-    baseURL: 'http://localhost:5000'
+    baseURL: 'http://127.0.0.1:5000'
   },
+  plugins: [{
+    src: '~/plugins/local-storage.js',
+    ssr: false
+  }],
   /*
    ** vuetify module configuration
    ** https://github.com/nuxt-community/vuetify-module

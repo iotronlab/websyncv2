@@ -11,13 +11,7 @@
           </v-list-item-content>
         </v-list-item>
         <v-list-item>
-          <v-switch
-            v-model="$vuetify.theme.dark"
-            hide-details
-            inset
-            :label="'Dark Mode'"
-            @change="updateTheme({status: $vuetify.theme.dark} )"
-          ></v-switch>
+          <v-switch v-model="$vuetify.theme.dark" hide-details inset :label="'Dark Mode'"></v-switch>
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
@@ -28,14 +22,12 @@
       <v-spacer />
 
       <v-btn v-show="$auth.loggedIn==false" nuxt to="/login" app>Sign in</v-btn>
-      <v-badge color="success" overlap right class="mt-1">
-        <template v-slot:badge>
-          <span v-if="list.length > 0">{{ list.length }}</span>
-        </template>
-        <v-btn small fab class="nufab mt-n1">
+
+      <v-btn small fab class="nufab mt-n1">
+        <v-badge :content="list.length" :value="list.length" color="green" overlap>
           <v-icon id="notifyicon">mdi-bell-ring-outline</v-icon>
-        </v-btn>
-      </v-badge>
+        </v-badge>
+      </v-btn>
     </v-app-bar>
     <v-banner v-model="banner" transition="slide-y-transition" class="mb-2" app>
       <v-icon slot="icon" color="success" size="36">mdi-wifi-strength-alert-outline</v-icon>
@@ -105,9 +97,12 @@ export default {
   },
   watch: {
     list(list) {
-      document.getElementById('notifyicon').classList.remove('notify')
-      void document.getElementById('notifyicon').offsetWidth
-      document.getElementById('notifyicon').classList.add('notify')
+      if (list.length > 0) {
+        document.getElementById('notifyicon').classList.remove('notify')
+        void document.getElementById('notifyicon').offsetWidth
+        document.getElementById('notifyicon').classList.add('notify')
+      }
+
       //    setTimeout(
       //    () => document.getElementById("notifyicon").classList.remove("notify"),
       //      1
@@ -126,14 +121,13 @@ export default {
     })
   },
   methods: {
-    ...mapActions(['initiateServer', 'initiateConnection', 'updatedDevice']),
+    ...mapActions(['initiateServer', 'initiateConnection']),
+
     async initialize() {
       await this.initiateServer()
-
       await this.initiateConnection()
-      await this.updatedDevice()
-
-      // commit('SET_CONNECTION', connection)
+      await this.$store.dispatch('yeelight/getYeelights')
+      // await this.updatedDevice()
     },
 
     checkConnection() {
@@ -147,7 +141,7 @@ export default {
   }
 }
 </script>
-<style scoped>
+<style>
 .v-application.theme--light .nufab {
   box-shadow: 9px 9px 16px rgb(163, 177, 198, 0.6),
     -9px -9px 16px rgba(255, 255, 255, 0.5) !important;

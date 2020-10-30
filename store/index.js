@@ -10,7 +10,7 @@ export const state = () => ({
   updatedDevice: Object,
   updatedDeviceList: [],
   snackbars: [],
-  theme: Boolean
+
 })
 
 export const getters = {
@@ -20,9 +20,7 @@ export const getters = {
   server(state) {
     return state.server
   },
-  theme(state) {
-    return state.theme
-  },
+
   connection(state) {
     return state.connection
   },
@@ -89,19 +87,7 @@ export const actions = {
       color: 'info'
     })
   },
-  async updateTheme({
-    commit
-  }, {
 
-    status
-  }) {
-
-
-    await commit('SET_THEME',
-      status
-    )
-
-  },
   async initiateConnection({
     commit
   }) {
@@ -119,7 +105,7 @@ export const actions = {
     commit
   }) {
     let response = await this.$axios.$get('/devices')
-    console.log(response)
+
     commit('SET_DEVICES', response.devices)
     commit('SET_SHAREDDEVICES', response.shared)
     commit('SET_ROOMS', response.rooms)
@@ -135,16 +121,34 @@ export const actions = {
       status
     })
     console.log(response)
-    dispatch('initiateDevice')
+    // dispatch('initiateDevice')
   },
-  async updatedDevice({
+  async socketUpdate({
     commit,
     dispatch
-  }) {
+  }, socketUpdate) {
+    console.log(socketUpdate)
 
-    commit('SET_UPDATEDDEVICE')
+    commit('SET_UPDATEDDEVICE', socketUpdate)
     dispatch('initiateDevice')
 
+    if (Notification.permission === 'granted') {
+      navigator.serviceWorker.getRegistration().then(function (reg) {
+        console.log(socketUpdate)
+        let options = {
+          body: socketUpdate.data.name + ' was updated',
+          vibrate: [100, 50, 100],
+          data: {
+            primaryKey: 1
+          }
+        }
+        reg.showNotification('Device Updated!', options)
+      })
+    }
+
+
+  },
+  async displayNotification(socketUpdate) {
 
   }
 }
